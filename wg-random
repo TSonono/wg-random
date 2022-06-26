@@ -2,7 +2,7 @@
 
 set -e
 
-start_vpn () {
+start_vpn() {
     if [ $1 -eq 1 ]; then
         echo "VPN is already up"
         exit 0
@@ -10,7 +10,7 @@ start_vpn () {
 
     configs=(/etc/wireguard/*)
     n_configs="${#configs[@]}"
-    random_config_index=$(( $RANDOM % n_configs + 0 ))
+    random_config_index=$(($RANDOM % n_configs + 0))
     random_config=${configs[random_config_index]}
 
     random_config_interface=$(echo ${random_config} | sed 's/\/etc\/wireguard\///' | sed 's/.conf//')
@@ -31,13 +31,23 @@ stop_vpn() {
     echo "VPN disabled"
 }
 
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root"
-  exit 1
+status() {
+    if [ $1 -eq 0 ]; then
+        echo "Currently no VPN connection is established"
+        exit 0
+    else
+        wg show
+        exit 0
+    fi
+}
+
+if [ "$EUID" -ne 0 ]; then
+    echo "Please run as root"
+    exit 1
 fi
 
 if [ "$#" -ne 1 ]; then
-    echo "Only one argument should be passed, 'up' or 'down'"
+    echo "Only one argument should be passed, 'up','down' or 'status'"
     exit 1
 fi
 
@@ -48,10 +58,17 @@ if [ "$current_wg_config" != "" ]; then
 fi
 
 case "$1" in
-	"down" )
-		stop_vpn $currently_up;;
-	"up" )
-		start_vpn $currently_up;;
-	* )
-		echo "Passed argument should be either 'up' or 'down'" && exit 1;;
+"down")
+    stop_vpn $currently_up
+    ;;
+"up")
+    start_vpn $currently_up
+    ;;
+"status")
+    status $currently_up
+    ;;
+*)
+    echo "Passed argument should be either 'up','down' or 'status'"
+    exit 1
+    ;;
 esac

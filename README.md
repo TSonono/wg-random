@@ -29,6 +29,8 @@ The following commands must run with `sudo`
 wg-random up
 # To stop the vpn:
 wg-random down
+# To view the status of the vpn:
+wg-random status
 ```
 
 ## Auto-start on boot

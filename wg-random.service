@@ -1,0 +1,9 @@
+[Unit]
+Description=Random Wireguard Connection
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/wg-random up
+
+[Install]
+WantedBy=multi-user.target

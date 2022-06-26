@@ -1,0 +1,57 @@
+#!/bin/sh
+
+set -e
+
+start_vpn () {
+    if [ $1 -eq 1 ]; then
+        echo "VPN is already up"
+        exit 0
+    fi
+
+    configs=(/etc/wireguard/*)
+    n_configs="${#configs[@]}"
+    random_config_index=$(( $RANDOM % n_configs + 0 ))
+    random_config=${configs[random_config_index]}
+
+    random_config_interface=$(echo ${random_config} | sed 's/\/etc\/wireguard\///' | sed 's/.conf//')
+    echo ${random_config_interface}
+
+    wg-quick up ${random_config_interface}
+    wg show
+}
+
+stop_vpn() {
+    if [ $1 -eq 0 ]; then
+        echo "VPN is already down"
+        exit 0
+    fi
+
+    current_wg_interface=$(wg show interfaces)
+    wg-quick down ${current_wg_interface}
+    echo "VPN disabled"
+}
+
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit 1
+fi
+
+if [ "$#" -ne 1 ]; then
+    echo "Only one argument should be passed, 'up' or 'down'"
+    exit 1
+fi
+
+current_wg_config=$(wg show)
+currently_up=0
+if [ "$current_wg_config" != "" ]; then
+    currently_up=1
+fi
+
+case "$1" in
+	"down" )
+		stop_vpn $currently_up;;
+	"up" )
+		start_vpn $currently_up;;
+	* )
+		echo "Passed argument should be either 'up' or 'down'" && exit 1;;
+esac

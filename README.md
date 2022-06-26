@@ -50,3 +50,6 @@ directly.
 
 ## TODO
 - Option to block non VPN communication with `iptables`
+- Additional option to only select among configuration files containing a
+  certain sub-string (useful for when the name of the configuration files
+  contains regions and/or other properties)
